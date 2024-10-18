@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { useState } from "react";
 import http from "../helpers/http";
+import { register } from "../services/auth.service";
 
 const AuthContextProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -19,7 +20,7 @@ const AuthContextProvider = ({ children }) => {
       if (response.data) {
         localStorage.setItem("token", response.data.token);
 
-        setUser(response.data.data);
+        setUser(response.data.user);
 
         return response.data;
       }
@@ -27,6 +28,7 @@ const AuthContextProvider = ({ children }) => {
       throw error;
     }
   };
+
   const logout = () => {
     setUser(null);
     localStorage.removeItem("token");
@@ -42,7 +44,6 @@ const AuthContextProvider = ({ children }) => {
         isLoading,
         setIsLoading,
         isLoggedIn,
-        setIsLoggedIn,
       }}
     >
       {children}

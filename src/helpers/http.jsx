@@ -2,7 +2,7 @@ import axios from "axios";
 
 const http = () => {
   let options = {
-    baseURL: "https://tatafo-backend.onrender.com/api",
+    baseURL: "https://tatafo-backend.vercel.app/api",
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
