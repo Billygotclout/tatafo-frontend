@@ -6,6 +6,7 @@ import { getUsers } from "../services/user.service";
 
 const Sidenav = () => {
   const [users, setUsers] = useState([]);
+  const [isOpen, setIsOpen] = useState(false); // State to track sidenav open/close status
 
   const getAllUsers = async () => {
     const data = await getUsers();
@@ -16,10 +17,26 @@ const Sidenav = () => {
     getAllUsers();
   }, []);
 
+  const toggleSidenav = () => {
+    setIsOpen(!isOpen);
+  };
+
   return (
-    <div className="flex ">
+    <div className="flex">
+      {/* Toggle button for mobile */}
+      <button
+        className="sm:hidden fixed top-2 left-5 z-20   text-black p-2 rounded"
+        onClick={toggleSidenav}
+      >
+        {isOpen ? "✕" : "☰"}
+      </button>
+
       {/* Sidenav */}
-      <div className="fixed top-0 left-0 z-10 bg-gray-100 w-[250px] sm:w-[300px] min-h-screen">
+      <div
+        className={`fixed top-0 left-0 z-10 bg-gray-100 w-[250px] sm:w-[300px] min-h-screen transition-transform duration-300 ${
+          isOpen ? "transform translate-x-0" : "transform -translate-x-full"
+        } sm:transform-none`}
+      >
         <nav className="flex flex-col items-center">
           {/* Logo */}
           <Link to="/dashboard">
@@ -39,6 +56,7 @@ const Sidenav = () => {
                 <Link
                   to={`/chat/${user._id}`}
                   className="text-black hover:underline"
+                  onClick={() => setIsOpen(false)} // Close sidenav on user click
                 >
                   {user.username}
                 </Link>
@@ -49,7 +67,7 @@ const Sidenav = () => {
       </div>
 
       {/* Main content area */}
-      <div className="py-5 px-2 w-full sm:ml-[300px] ml-[250px]">
+      <div className="py-5 px-2 w-full sm:ml-[300px]">
         <Outlet />
       </div>
 
@@ -57,8 +75,8 @@ const Sidenav = () => {
       <style>
         {`
           @media (max-width: 640px) {
-            .fixed { width: 200px; }
-            .sm\\:ml-[300px] { margin-left: 200px; }
+            .sm\\:ml-[300px] { margin-left: 0; }
+          
           }
         `}
       </style>

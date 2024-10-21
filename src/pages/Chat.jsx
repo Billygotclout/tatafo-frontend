@@ -14,44 +14,53 @@ const Chat = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       const userData = await getUserById(userId);
-
       setReceiver(userData);
     };
+
     const fetchMessages = async () => {
       const messagesData = await getMessages(user._id, userId);
-      console.log(messagesData);
-
       setMessages(messagesData);
     };
 
     const pusher = new Pusher(import.meta.env.VITE_PUSHER_KEY, {
       cluster: import.meta.env.VITE_PUSHER_CLUSTER,
     });
-    console.log(pusher);
-    const channel = pusher.subscribe(`chat-${userId}`);
-    channel.bind("new-message", (data) => {
-      setMessages((prevMessages) => [...prevMessages, data.message]);
-    });
 
-    channel.bind("pusher:subscription_error", (statusCode) => {
-      console.error("Pusher subscription error:", statusCode);
-    });
+    // Subscribe to both channels - one for sent messages, one for received
+    const receivingChannel = pusher.subscribe(`chat-${user._id}`);
+    const sendingChannel = pusher.subscribe(`chat-${userId}`);
+
+    // Handle incoming messages on both channels
+    const messageHandler = (data) => {
+      console.log("New message received:", data);
+      setMessages((prevMessages) => {
+        // Check if message already exists to prevent duplicates
+        const messageExists = prevMessages.some((msg) => msg._id === data._id);
+        if (messageExists) return prevMessages;
+        return [...prevMessages, data];
+      });
+    };
+
+    receivingChannel.bind("new-message", messageHandler);
+    sendingChannel.bind("new-message", messageHandler);
 
     fetchUserData();
     fetchMessages();
-    return () => {
-      channel.unbind_all();
-      channel.unsubscribe();
-    };
-  }, [userId]);
 
+    return () => {
+      receivingChannel.unbind_all();
+      sendingChannel.unbind_all();
+      pusher.unsubscribe(`chat-${user._id}`);
+      pusher.unsubscribe(`chat-${userId}`);
+    };
+  }, [userId, user?._id]);
   const handleSendMessage = async () => {
     if (newMessage.trim()) {
       const sentMessage = await sendMessage({
         receiverId: userId,
         message: newMessage,
       });
-      setMessages((prevMessages) => [...prevMessages, sentMessage]);
+      setMessages((prevMessages) => [...prevMessages, sentMessage.data]);
       setNewMessage("");
     }
   };
@@ -73,9 +82,9 @@ const Chat = () => {
           <p>No messages yet</p>
         ) : (
           <ul className="space-y-3">
-            {messages.map((msg) => (
+            {messages.map((msg, index) => (
               <li
-                key={msg?._id}
+                key={`${msg?._id}-${index}`} // Combine _id with index for uniqueness
                 className={`flex ${
                   msg?.senderId === user?._id ? "justify-end" : "justify-start"
                 }`}
