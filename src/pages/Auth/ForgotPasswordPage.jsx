@@ -13,7 +13,7 @@ const ForgotPasswordPage = () => {
 
         toast.success(user.message);
       } catch (error) {
-        toast.error(error.message);
+        toast.error(error.response.data.message);
       }
     },
   });
@@ -21,7 +21,7 @@ const ForgotPasswordPage = () => {
     <>
       <img src="/assets/logo.png" alt="" className="w-40" />
 
-      <div className="p-3 md:w-1/2 m-auto mt-64">
+      <div className="p-3   mt-64 w-1/2  mx-auto">
         <form className="mt-4 space-y-2 " onSubmit={formik.handleSubmit}>
           <div className="flex flex-col">
             <label htmlFor="email">Enter your email</label>

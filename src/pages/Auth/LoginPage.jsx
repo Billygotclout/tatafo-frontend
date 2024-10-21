@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useTitle } from "../../hooks/useTitle";
 import { useFormik } from "formik";
 import signInSchema from "../../helpers/validations/signInSchema";
@@ -7,6 +7,7 @@ import { useAuth } from "../../hooks/useAuth";
 
 const LoginPage = () => {
   const { login } = useAuth();
+  const navigate = useNavigate();
   useTitle("Log In");
 
   const formik = useFormik({
@@ -16,8 +17,9 @@ const LoginPage = () => {
       try {
         const loginUser = await login(values.email, values.password);
         toast.success(loginUser.message);
+        navigate("/");
       } catch (error) {
-        toast.error(error.message);
+        toast.error(error.response.data.message);
       }
     },
   });

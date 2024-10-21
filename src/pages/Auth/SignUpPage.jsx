@@ -21,12 +21,16 @@ const SignUpPage = () => {
       confirmPassword: "",
     },
     onSubmit: async (values) => {
-      console.log(values);
-      const response = await register(values);
-      if (response) {
-        console.log(response);
-        navigate("/");
-        toast.success(response.message);
+      try {
+        console.log(values);
+        const response = await register(values);
+        if (response) {
+          console.log(response);
+          navigate("/login");
+          toast.success(response.message);
+        }
+      } catch (error) {
+        toast.error(error.response.data.message);
       }
     },
   });
