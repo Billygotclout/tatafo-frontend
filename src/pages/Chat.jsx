@@ -60,7 +60,7 @@ const Chat = () => {
         receiverId: userId,
         message: newMessage,
       });
-      setMessages((prevMessages) => [...prevMessages, sentMessage.data]);
+
       setNewMessage("");
     }
   };
